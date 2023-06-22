@@ -26,6 +26,10 @@ build:
 	go generate
 	go build
 
+## setup a local instance of kafka running in docker
+kafka.run:
+	docker compose up
+
 ## builds the binary and deploys a monolith instance to local machine
 monolith.run: build
 	weaver single deploy weaver.toml

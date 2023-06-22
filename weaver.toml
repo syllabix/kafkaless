@@ -7,3 +7,7 @@ listeners.server = { address = "localhost:12345" }
 [multi]
 mtls = true
 listeners.server = { address = "localhost:12345" }
+
+["github.com/syllabix/kafkaless/producer/Service"]
+Address = ["localhost:9092"]
+Topic = "events"

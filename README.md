@@ -8,12 +8,19 @@ You will need to have the following installed to work with the project
 
 1. [Go](https://go.dev/doc/install)
 2. [Weaver](https://serviceweaver.dev/docs.html#installation)
+3. [Docker](https://docs.docker.com/engine/install/)
 
 ## Running The App
 
 The following assumes you are running a machine with `Make` available. If not, you can use the the `Go` toolchain and `Weaver` CLI directly. Please consult the [`Makefile`](./Makefile) for the commands that are used to compose the following `Make` recipes.
 
-Run the following in your terminal
+Ensure Kafka is running and configured by executing the following in your terminal
+```
+make kafka.run
+```
+
+Run the following in your terminal:
+
 ```
 // run the app as a monolith on your local machine
 make monolith.run
@@ -28,4 +35,11 @@ make services.run
 // in a new terminal
 make services.dashboard
 ```
+
+Once you have verified the application is running, use the following cURL command to issue events that will be produced to Kafka
+
+```
+curl "localhost:12345/emit?event=dolwr"
+```
+
 
