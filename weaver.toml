@@ -11,3 +11,8 @@ listeners.server = { address = "localhost:12345" }
 ["github.com/syllabix/kafkaless/producer/Service"]
 Address = ["localhost:9092"]
 Topic = "events"
+
+["github.com/syllabix/kafkaless/consumer/Service"]
+Brokers = ["localhost:9092"]
+Topic = "events"
+GroupID = "consumer-group-id"

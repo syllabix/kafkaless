@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/ServiceWeaver/weaver"
+	"github.com/syllabix/kafkaless/consumer"
 	"github.com/syllabix/kafkaless/producer"
 )
 
@@ -15,6 +16,7 @@ import (
 // it and passes it to serve.
 type app struct {
 	weaver.Implements[weaver.Main]
+	weaver.Ref[consumer.Service]
 	producer weaver.Ref[producer.Service]
 	server   weaver.Listener
 }
@@ -30,7 +32,7 @@ func start(ctx context.Context, app *app) error {
 	// system. This behavior can be changed in the config file.
 	fmt.Printf("server listener available on %v\n", app.server)
 
-	// Serve the /hello endpoint.
+	// Serve the /emit endpoint.
 	http.HandleFunc("/emit", func(w http.ResponseWriter, r *http.Request) {
 		name := r.URL.Query().Get("event")
 		if name == "" {
