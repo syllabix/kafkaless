@@ -19,3 +19,9 @@
 
 # Go workspace file
 go.work
+
+# ignore weaver generated files
+*_gen.go
+
+# ignore binary
+kafkaless

@@ -1,0 +1,9 @@
+[serviceweaver]
+binary = "./kafkaless"
+
+[single]
+listeners.server = { address = "localhost:12345" }
+
+[multi]
+mtls = true
+listeners.server = { address = "localhost:12345" }
