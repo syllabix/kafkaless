@@ -41,7 +41,6 @@ func start(ctx context.Context, app *app) error {
 
 		err := app.producer.Get().EmitEvent(ctx, name)
 		if err != nil {
-			app.Logger().Error("failed to emit event", "error", err)
 			http.Error(w, "oops... sorry about that", http.StatusInternalServerError)
 			return
 		}

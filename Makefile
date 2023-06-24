@@ -57,5 +57,5 @@ TOTAL_REQUESTS := 1000
 requests:
 	@for i in $$(seq $(TOTAL_REQUESTS)); do \
 		echo "Sending request: $$i"; \
-		curl "$(URL)"; \
+		curl "$(URL)+$$i"; \
 	done

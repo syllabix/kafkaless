@@ -32,9 +32,10 @@ func (p *producer) Init(ctx context.Context) error {
 		Info("initializing producer ...")
 
 	p.kafka = &kafka.Writer{
-		Addr:     kafka.TCP(p.Config().Address...),
-		Topic:    p.Config().Topic,
-		Balancer: new(kafka.LeastBytes),
+		Addr:      kafka.TCP(p.Config().Address...),
+		Topic:     p.Config().Topic,
+		Balancer:  new(kafka.RoundRobin),
+		BatchSize: 1,
 	}
 
 	return nil
@@ -50,7 +51,9 @@ func (p *producer) EmitEvent(ctx context.Context, str string) error {
 		Value: []byte(reversed),
 	})
 	if err != nil {
+		p.Logger().Error("failed to emit event", "error", err)
 		return fmt.Errorf("failed to emit event: %w", err)
 	}
+
 	return nil
 }
