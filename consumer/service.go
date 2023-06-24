@@ -39,7 +39,7 @@ func (c *consumer) Init(ctx context.Context) error {
 
 	cfg, err := aws.LoadDefaultConfig(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to load aws config", "reason", err.Error())
+		return fmt.Errorf("failed to load aws config reason: %w", err)
 	}
 
 	sasl := &aws_msk_iam_v2.Mechanism{
