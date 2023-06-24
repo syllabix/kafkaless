@@ -46,10 +46,11 @@ listener:
 		select {
 		case <-ctx.Done():
 			break listener
+
 		default:
 			msg, err := c.reader.ReadMessage(ctx)
 			if err != nil {
-				logger.ErrorCtx(ctx, "failed to read message from kafka", "reason", err)
+				logger.Error("failed to read message from kafka", "reason", err.Error())
 				continue
 			}
 			logger.Info("received message", "offset", msg.Offset, "message", string(msg.Value))

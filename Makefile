@@ -22,13 +22,14 @@ help:
 		| sort >&2
 	@echo "" >&2
 
+## build an executable
 build:
 	go generate
 	go build
 
 ## setup a local instance of kafka running in docker
 kafka.run:
-	docker compose up
+	docker compose up --remove-orphans
 
 ## builds the binary and deploys a monolith instance to local machine
 monolith.run: build
@@ -46,3 +47,15 @@ services.dashboard:
 clean:
 	rm kafkaless
 	find . -name '*_gen.go' -delete
+
+
+URL := http://localhost:12345/emit?event=dlrow+olleh
+TOTAL_REQUESTS := 1000
+
+.PHONY: requests
+
+requests:
+	@for i in $$(seq $(TOTAL_REQUESTS)); do \
+		echo "Sending request: $$i"; \
+		curl "$(URL)"; \
+	done
