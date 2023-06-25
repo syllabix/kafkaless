@@ -18,6 +18,7 @@ type config struct {
 	Topic   string
 	Brokers []string
 	GroupID string
+	Region  string
 }
 
 type Service interface {
@@ -45,7 +46,7 @@ func (c *consumer) Init(ctx context.Context) error {
 	sasl := &aws_msk_iam_v2.Mechanism{
 		Signer:      signer.NewSigner(),
 		Credentials: cfg.Credentials,
-		Region:      "eu-central-1",
+		Region:      c.Config().Region,
 		SignTime:    time.Now(),
 		Expiry:      time.Minute * 15,
 	}
