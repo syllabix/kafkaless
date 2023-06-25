@@ -21,7 +21,7 @@
 go.work
 
 # ignore weaver generated files
-*_gen.go
+# *_gen.go
 
 # ignore binary
 kafkaless
