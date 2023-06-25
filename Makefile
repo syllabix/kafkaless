@@ -49,7 +49,6 @@ clean:
 	find . -name '*_gen.go' -delete
 
 
-URL := http://localhost:12345/emit?event=dlrow+olleh
 TOTAL_REQUESTS := 1000
 
 .PHONY: requests
@@ -57,5 +56,5 @@ TOTAL_REQUESTS := 1000
 requests:
 	@for i in $$(seq $(TOTAL_REQUESTS)); do \
 		echo "Sending request: $$i"; \
-		curl "$(URL)+$$i"; \
+		curl -X PUT "http://localhost:12345/emit?event=$$i+dlrow+olleh"; \
 	done

@@ -36,10 +36,12 @@ make services.run
 make services.dashboard
 ```
 
-Once you have verified the application is running, use the following cURL command to issue events that will be produced to Kafka
+Once you have verified the application is running, run the following to issue 1000 example requests to the running API server
 
 ```
-curl "localhost:12345/emit?event=dolwr"
+make requests
 ```
+
+
 
 

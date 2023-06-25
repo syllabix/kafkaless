@@ -2,6 +2,7 @@ package consumer
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/ServiceWeaver/weaver"
 	"github.com/segmentio/kafka-go"
@@ -13,7 +14,9 @@ type config struct {
 	GroupID string
 }
 
-type Service interface{}
+type Service interface {
+	Shutdown(context.Context) error
+}
 
 type consumer struct {
 	weaver.Implements[Service]
@@ -36,6 +39,13 @@ func (c *consumer) Init(ctx context.Context) error {
 
 	go c.listen(ctx)
 
+	return nil
+}
+
+func (c *consumer) Shutdown(ctx context.Context) error {
+	if err := c.reader.Close(); err != nil {
+		return fmt.Errorf("consumer service did not shutdown properly: %w", err)
+	}
 	return nil
 }
 
