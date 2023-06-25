@@ -2,11 +2,11 @@
 binary = "./kafkaless"
 
 [single]
-listeners.api = { address = "localhost:12345" }
+listeners.api = { address = "127.0.0.1:12345" }
 
 [multi]
 mtls = true
-listeners.api = { address = "localhost:12345" }
+listeners.api = { address = "127.0.0.1:12345" }
 
 ["github.com/syllabix/kafkaless/producer/Service"]
 Address = ["localhost:9092"]

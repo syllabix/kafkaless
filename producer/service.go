@@ -45,7 +45,7 @@ func (p *producer) Init(ctx context.Context) error {
 	sasl := &aws_msk_iam_v2.Mechanism{
 		Signer:      signer.NewSigner(),
 		Credentials: cfg.Credentials,
-		Region:      p.Config().Topic,
+		Region:      "eu-central-1",
 		SignTime:    time.Now(),
 		Expiry:      time.Minute * 15,
 	}
