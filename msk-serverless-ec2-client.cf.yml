@@ -1,0 +1,141 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID where the MSK cluster is located
+  AmiId:
+    Type: String
+    Description: The ID of the Amazon Machine Image you would like to provision the EC2 instance with
+  MyKeyPair:
+    Type: String
+    Description: The key pair name you would like to use to connect to the client EC2 instance
+  Subnet1:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet ID within the VPC where the MSK cluster is located
+  Subnet2:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet ID within the VPC where the MSK cluster is located
+  Subnet3:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet ID within the VPC where the MSK cluster is located
+Resources:
+  MSKSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for MSK Cluster
+      VpcId: !Ref VpcId
+
+  MSKSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref MSKSecurityGroup
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      SourceSecurityGroupId: !Ref MSKSecurityGroup
+
+  MSKSecurityGroupEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref MSKSecurityGroup
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      SourceSecurityGroupId: !Ref MSKSecurityGroup
+
+  MSKServerlessCluster:
+    Type: AWS::MSK::ServerlessCluster
+    DependsOn: [MSKSecurityGroup]
+    Properties:
+      ClusterName: msk-serverless-example-cluster
+      ClientAuthentication:
+        Sasl:
+          Iam:
+            Enabled: true
+      VpcConfigs:
+        -
+          SecurityGroups:
+            - !Ref MSKSecurityGroup
+          SubnetIds:
+            - !Ref Subnet1
+            - !Ref Subnet2
+            - !Ref Subnet3
+
+  MSKTopicPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: MSKTopicPolicy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - kafka-cluster:Connect
+              - kafka-cluster:AlterCluster
+              - kafka-cluster:DescribeCluster
+            Resource:
+              - !Sub 'arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:cluster/msk-serverless-tutorial-cluster/*'
+          - Effect: Allow
+            Action:
+              - kafka-cluster:*Topic
+              - kafka-cluster:WriteData
+              - kafka-cluster:ReadData
+            Resource:
+              - !Sub 'arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:topic/msk-serverless-tutorial-cluster/*'
+          - Effect: Allow
+            Action:
+              - kafka-cluster:AlterGroup
+              - kafka-cluster:DescribeGroup
+            Resource:
+              - !Sub 'arn:aws:kafka:${AWS::Region}:${AWS::AccountId}:group/msk-serverless-tutorial-cluster/*'
+
+  MSKTopicPolicyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: MSKTopicPolicyRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ['ec2.amazonaws.com']
+            Action: ['sts:AssumeRole']
+          - Effect: Allow
+            Principal:
+              Service: ['kafka.amazonaws.com']
+            Action: ['sts:AssumeRole']
+      ManagedPolicyArns:
+        - !Ref MSKTopicPolicy
+
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: msk-client-Instance
+      Roles:
+        - !Ref MSKTopicPolicyRole
+
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VpcId
+      GroupDescription: Security Group for EC2 Instance
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: '-1'
+          CidrIp: 0.0.0.0/0
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AmiId
+      InstanceType: t2.micro
+      KeyName: !Ref MyKeyPair
+      SubnetId: !Ref Subnet1
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      SecurityGroupIds:
+        - !Ref MSKSecurityGroup
+        - !Ref EC2SecurityGroup

@@ -2,16 +2,23 @@ package consumer
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"time"
 
 	"github.com/ServiceWeaver/weaver"
 	"github.com/segmentio/kafka-go"
+
+	signer "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
+	aws "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/segmentio/kafka-go/sasl/aws_msk_iam_v2"
 )
 
 type config struct {
 	Topic   string
 	Brokers []string
 	GroupID string
+	Region  string
 }
 
 type Service interface {
@@ -31,10 +38,32 @@ func (c *consumer) Init(ctx context.Context) error {
 		With("group-id", c.Config().GroupID).
 		Info("initializing consumer ...")
 
+	cfg, err := aws.LoadDefaultConfig(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to load aws config reason: %w", err)
+	}
+
+	sasl := &aws_msk_iam_v2.Mechanism{
+		Signer:      signer.NewSigner(),
+		Credentials: cfg.Credentials,
+		Region:      c.Config().Region,
+		SignTime:    time.Now(),
+		Expiry:      time.Minute * 15,
+	}
+
 	c.reader = kafka.NewReader(kafka.ReaderConfig{
 		Topic:   c.Config().Topic,
 		Brokers: c.Config().Brokers,
 		GroupID: c.Config().GroupID,
+		MaxWait: 50000 * time.Millisecond,
+		Dialer: &kafka.Dialer{
+			Timeout:       15 * time.Second,
+			DualStack:     true,
+			SASLMechanism: sasl,
+			TLS: &tls.Config{
+				MinVersion: tls.VersionTLS12,
+			},
+		},
 	})
 
 	go c.listen(ctx)
